@@ -28,7 +28,7 @@ jobs:
         fi
         
         # .md 파일이 아닌 코드 파일들만 필터링
-        grep -v '\.md$' changed_files.txt | grep -E '\.(py|js|ts|java|cpp|c|go|rs|php|rb|kt|scala|swift)$' > code_files.txt || true
+        grep -v '\.md$' changed_files.txt | grep -E '\.(py|js|ts|java|go)$' > code_files.txt || true
         
         if [ -s code_files.txt ]; then
           echo "has_code_files=true" >> $GITHUB_OUTPUT
@@ -57,12 +57,6 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-
-    - name: 🔧 Setup C++
-      if: steps.changes.outputs.has_code_files == 'true'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y g++ gcc
 
     - name: 🐹 Setup Go
       if: steps.changes.outputs.has_code_files == 'true'
@@ -116,29 +110,7 @@ jobs:
                 echo "❌ $file 실행 실패"
               fi
               ;;
-            *.cpp|*.cc)
-              echo "🔧 Running C++ file..."
-              output_file="${file%.*}"
-              if g++ -o "$output_file" "$file" && timeout 30s "./$output_file"; then
-                echo "✅ $file 실행 성공"
-                success_count=$((success_count + 1))
-                rm -f "$output_file"
-              else
-                echo "❌ $file 실행 실패"
-              fi
-              ;;
-            *.c)
-              echo "🔧 Running C file..."
-              output_file="${file%.*}"
-              if gcc -o "$output_file" "$file" && timeout 30s "./$output_file"; then
-                echo "✅ $file 실행 성공"
-                success_count=$((success_count + 1))
-                rm -f "$output_file"
-              else
-                echo "❌ $file 실행 실패"
-              fi
-              ;;
-            *.go)
+                        *.go)
               echo "🐹 Running Go file..."
               if timeout 30s go run "$file"; then
                 echo "✅ $file 실행 성공"
