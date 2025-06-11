@@ -1,0 +1,199 @@
+name: 🔍 Coding Test Verification
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main, master]
+
+jobs:
+  test-solutions:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: 🔍 Detect changed files
+      id: changes
+      run: |
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          # PR에서 변경된 파일들 감지
+          git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} > changed_files.txt
+        else
+          # Push에서 변경된 파일들 감지
+          git diff --name-only HEAD~1 HEAD > changed_files.txt
+        fi
+        
+        # .md 파일이 아닌 코드 파일들만 필터링
+        grep -v '\.md$' changed_files.txt | grep -E '\.(py|js|ts|java|cpp|c|go|rs|php|rb|kt|scala|swift)$' > code_files.txt || true
+        
+        if [ -s code_files.txt ]; then
+          echo "has_code_files=true" >> $GITHUB_OUTPUT
+          echo "📋 변경된 코드 파일들:"
+          cat code_files.txt
+        else
+          echo "has_code_files=false" >> $GITHUB_OUTPUT
+          echo "❌ 변경된 코드 파일이 없습니다."
+        fi
+
+    - name: 🐍 Setup Python
+      if: steps.changes.outputs.has_code_files == 'true'
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: ☕ Setup Java
+      if: steps.changes.outputs.has_code_files == 'true'
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: 🚀 Setup Node.js
+      if: steps.changes.outputs.has_code_files == 'true'
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: 🔧 Setup C++
+      if: steps.changes.outputs.has_code_files == 'true'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y g++ gcc
+
+    - name: 🐹 Setup Go
+      if: steps.changes.outputs.has_code_files == 'true'
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+
+    - name: 🧪 Run code tests
+      if: steps.changes.outputs.has_code_files == 'true'
+      run: |
+        echo "🔍 코드 파일 실행 및 검증 시작..."
+        
+        success_count=0
+        total_count=0
+        
+        while IFS= read -r file; do
+          if [ ! -f "$file" ]; then
+            continue
+          fi
+          
+          echo "📄 Testing: $file"
+          total_count=$((total_count + 1))
+          
+          # 파일 확장자에 따라 실행
+          case "$file" in
+            *.py)
+              echo "🐍 Running Python file..."
+              if timeout 30s python3 "$file"; then
+                echo "✅ $file 실행 성공"
+                success_count=$((success_count + 1))
+              else
+                echo "❌ $file 실행 실패"
+              fi
+              ;;
+            *.java)
+              echo "☕ Running Java file..."
+              class_name=$(basename "$file" .java)
+              if javac "$file" && timeout 30s java "$class_name"; then
+                echo "✅ $file 실행 성공"
+                success_count=$((success_count + 1))
+              else
+                echo "❌ $file 실행 실패"
+              fi
+              ;;
+            *.js)
+              echo "🚀 Running JavaScript file..."
+              if timeout 30s node "$file"; then
+                echo "✅ $file 실행 성공"
+                success_count=$((success_count + 1))
+              else
+                echo "❌ $file 실행 실패"
+              fi
+              ;;
+            *.cpp|*.cc)
+              echo "🔧 Running C++ file..."
+              output_file="${file%.*}"
+              if g++ -o "$output_file" "$file" && timeout 30s "./$output_file"; then
+                echo "✅ $file 실행 성공"
+                success_count=$((success_count + 1))
+                rm -f "$output_file"
+              else
+                echo "❌ $file 실행 실패"
+              fi
+              ;;
+            *.c)
+              echo "🔧 Running C file..."
+              output_file="${file%.*}"
+              if gcc -o "$output_file" "$file" && timeout 30s "./$output_file"; then
+                echo "✅ $file 실행 성공"
+                success_count=$((success_count + 1))
+                rm -f "$output_file"
+              else
+                echo "❌ $file 실행 실패"
+              fi
+              ;;
+            *.go)
+              echo "🐹 Running Go file..."
+              if timeout 30s go run "$file"; then
+                echo "✅ $file 실행 성공"
+                success_count=$((success_count + 1))
+              else
+                echo "❌ $file 실행 실패"
+              fi
+              ;;
+            *)
+              echo "⚠️ $file: 지원하지 않는 파일 형식"
+              ;;
+          esac
+          echo "---"
+        done < code_files.txt
+        
+        echo "📊 결과 요약:"
+        echo "- 총 파일 수: $total_count"
+        echo "- 성공한 파일: $success_count"
+        echo "- 실패한 파일: $((total_count - success_count))"
+        
+        if [ $success_count -eq $total_count ] && [ $total_count -gt 0 ]; then
+          echo "🎉 모든 코드 파일이 성공적으로 실행되었습니다!"
+          exit 0
+        elif [ $total_count -eq 0 ]; then
+          echo "ℹ️ 실행할 코드 파일이 없습니다."
+          exit 0
+        else
+          echo "💥 일부 코드 파일 실행에 실패했습니다."
+          exit 1
+        fi
+
+    - name: 📝 Comment on PR
+      if: github.event_name == 'pull_request' && steps.changes.outputs.has_code_files == 'true'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          
+          // 워크플로우 결과에 따른 코멘트 생성
+          const workflowUrl = `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
+          
+          let comment = `## 🔍 코딩 테스트 검증 결과\n\n`;
+          comment += `자동으로 코드를 실행하여 검증했습니다.\n\n`;
+          comment += `📊 [상세 결과 보기](${workflowUrl})\n\n`;
+          
+          if (process.env.GITHUB_JOB_STATUS === 'success') {
+            comment += `✅ **모든 코드가 성공적으로 실행되었습니다!**\n`;
+          } else {
+            comment += `❌ **일부 코드 실행에 문제가 있습니다.**\n`;
+            comment += `위 링크에서 상세한 오류 내용을 확인해주세요.\n`;
+          }
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          }); 
