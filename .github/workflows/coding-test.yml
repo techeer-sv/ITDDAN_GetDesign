@@ -7,7 +7,7 @@ on:
     branches: [main, master]
 
 jobs:
-  test-solutions:
+  lint-and-test:
     runs-on: ubuntu-latest
     
     steps:
@@ -64,7 +64,163 @@ jobs:
       with:
         go-version: '1.21'
 
-    - name: 🧪 Run code tests
+    - name: 🔍 Install Linters
+      if: steps.changes.outputs.has_code_files == 'true'
+      run: |
+        echo "🔧 Installing linters for all languages..."
+        
+        # Python linters
+        python3 -m pip install --upgrade pip
+        pip install flake8 black isort
+        
+        # JavaScript linters
+        npm install -g eslint prettier @eslint/create-config
+        
+        # Go linters
+        go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+        
+        # Java linters (checkstyle)
+        wget -q https://github.com/checkstyle/checkstyle/releases/download/checkstyle-10.12.4/checkstyle-10.12.4-all.jar -O checkstyle.jar
+        
+        echo "✅ All linters installed successfully!"
+
+    - name: 🧹 Run Lint Tests
+      if: steps.changes.outputs.has_code_files == 'true'
+      run: |
+        echo "🔍 Running lint tests on changed files..."
+        
+        lint_success=0
+        lint_total=0
+        
+        while IFS= read -r file; do
+          if [ ! -f "$file" ]; then
+            continue
+          fi
+          
+          echo "🔍 Linting: $file"
+          lint_total=$((lint_total + 1))
+          
+                     case "$file" in
+             *.py)
+               echo "🐍 Running Python linters via script..."
+               if ./scripts/lint_python.sh "$file"; then
+                 echo "✅ $file passed Python lint"
+                 lint_success=$((lint_success + 1))
+               else
+                 echo "❌ $file failed Python lint"
+               fi
+               ;;
+                             
+            *.js)
+              echo "🚀 Running JavaScript linters..."
+              lint_passed=true
+              
+              # ESLint (if .eslintrc exists or create basic config)
+              if [ ! -f ".eslintrc.json" ] && [ ! -f ".eslintrc.js" ]; then
+                echo '{"extends": ["eslint:recommended"], "env": {"node": true, "es6": true}, "parserOptions": {"ecmaVersion": 2022}}' > .eslintrc.json
+              fi
+              
+              if ! npx eslint "$file"; then
+                echo "❌ ESLint issues found in $file"
+                lint_passed=false
+              fi
+              
+              # Prettier (formatter check)
+              if ! npx prettier --check "$file"; then
+                echo "❌ Prettier formatting issues found in $file"
+                lint_passed=false
+              fi
+              
+              if $lint_passed; then
+                echo "✅ $file passed JavaScript lint"
+                lint_success=$((lint_success + 1))
+              fi
+              ;;
+              
+            *.java)
+              echo "☕ Running Java linters..."
+              lint_passed=true
+              
+              # Create basic checkstyle config if not exists
+              if [ ! -f "checkstyle.xml" ]; then
+                cat > checkstyle.xml << 'EOF'
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN" "https://checkstyle.org/dtds/configuration_1_3.dtd">
+<module name="Checker">
+  <module name="TreeWalker">
+    <module name="UnusedImports"/>
+    <module name="RedundantImport"/>
+    <module name="IllegalImport"/>
+    <module name="AvoidStarImport"/>
+    <module name="ConstantName"/>
+    <module name="LocalFinalVariableName"/>
+    <module name="LocalVariableName"/>
+    <module name="MemberName"/>
+    <module name="MethodName"/>
+    <module name="PackageName"/>
+    <module name="ParameterName"/>
+    <module name="StaticVariableName"/>
+    <module name="TypeName"/>
+  </module>
+</module>
+EOF
+              fi
+              
+              if ! java -jar checkstyle.jar -c checkstyle.xml "$file"; then
+                echo "❌ Checkstyle issues found in $file"
+                lint_passed=false
+              fi
+              
+              if $lint_passed; then
+                echo "✅ $file passed Java lint"
+                lint_success=$((lint_success + 1))
+              fi
+              ;;
+              
+            *.go)
+              echo "🐹 Running Go linters..."
+              lint_passed=true
+              
+              # gofmt (formatter check)
+              if [ "$(gofmt -l "$file")" ]; then
+                echo "❌ Go formatting issues found in $file"
+                gofmt -d "$file"
+                lint_passed=false
+              fi
+              
+              # golangci-lint
+              if ! golangci-lint run "$file"; then
+                echo "❌ Golangci-lint issues found in $file"
+                lint_passed=false
+              fi
+              
+              if $lint_passed; then
+                echo "✅ $file passed Go lint"
+                lint_success=$((lint_success + 1))
+              fi
+              ;;
+              
+            *)
+              echo "⚠️ $file: No linter configured for this file type"
+              lint_success=$((lint_success + 1))  # Skip unknown files
+              ;;
+          esac
+          echo "---"
+        done < code_files.txt
+        
+        echo "🔍 Lint Results Summary:"
+        echo "- Total files linted: $lint_total"
+        echo "- Files passed: $lint_success"
+        echo "- Files failed: $((lint_total - lint_success))"
+        
+        if [ $lint_success -eq $lint_total ]; then
+          echo "✅ All files passed lint checks!"
+        else
+          echo "❌ Some files failed lint checks."
+          exit 1
+        fi
+
+    - name: 🧪 Run Code Tests
       if: steps.changes.outputs.has_code_files == 'true'
       run: |
         echo "🔍 코드 파일 실행 및 검증 시작..."
