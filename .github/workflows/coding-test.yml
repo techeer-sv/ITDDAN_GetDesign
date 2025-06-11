@@ -100,17 +100,18 @@ jobs:
           echo "🔍 Linting: $file"
           lint_total=$((lint_total + 1))
           
-                     case "$file" in
-             *.py)
-               echo "🐍 Running Python linters via script..."
-               if ./scripts/lint_python.sh "$file"; then
-                 echo "✅ $file passed Python lint"
-                 lint_success=$((lint_success + 1))
-               else
-                 echo "❌ $file failed Python lint"
-               fi
-               ;;
-                             
+          case "$file" in
+            *.py)
+              echo "🐍 Running Python linters via script..."
+              chmod +x scripts/lint_python.sh
+              if ./scripts/lint_python.sh "$file"; then
+                echo "✅ $file passed Python lint"
+                lint_success=$((lint_success + 1))
+              else
+                echo "❌ $file failed Python lint"
+              fi
+              ;;
+              
             *.js)
               echo "🚀 Running JavaScript linters..."
               lint_passed=true
@@ -266,7 +267,7 @@ EOF
                 echo "❌ $file 실행 실패"
               fi
               ;;
-                        *.go)
+            *.go)
               echo "🐹 Running Go file..."
               if timeout 30s go run "$file"; then
                 echo "✅ $file 실행 성공"
