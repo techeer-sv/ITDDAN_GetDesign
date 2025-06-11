@@ -7,30 +7,29 @@
 # 3. 여러 리뷰어를 지정하려면 공백으로 구분하세요
 
 # 🐍 Python 파일들
-*.py                    @ITDDAN-py-reviewer
-**/*.py                 @ITDDAN-py-reviewer
+*.py                    @techeer-sv/itddan-py-reviewers
+**/*.py                 @techeer-sv/itddan-py-reviewers
 
 # ☕ Java 파일들
-*.java                  @ITDDAN-java-reviewer
-**/*.java               @ITDDAN-java-reviewer
+*.java                  @techeer-sv/itddan-java-reviewers
+**/*.java               @techeer-sv/itddan-java-reviewers
 
 # 🚀 JavaScript/TypeScript 파일들
-*.js                    @ITDDAN-js-reviewer
-*.ts                    @ITDDAN-js-reviewer
-**/*.js                 @ITDDAN-js-reviewer
-**/*.ts                 @ITDDAN-js-reviewer
-
+*.js                    @techeer-sv/itddan-js-reviewers
+*.ts                    @techeer-sv/itddan-js-reviewers
+**/*.js                 @techeer-sv/itddan-js-reviewers
+**/*.ts                 @techeer-sv/itddan-js-reviewers
 
 # 🐹 Go 파일들
-*.go                    @ITDDAN-go-reviewer
-**/*.go                 @ITDDAN-go-reviewer
+*.go                    @techeer-sv/itddan-go-reviewers
+**/*.go                 @techeer-sv/itddan-go-reviewers
 
 # 📦 패키지 관리 파일들
-package.json            @ITDDAN-js-reviewer @ITDDAN-devops-reviewer
-package-lock.json       @ITDDAN-js-reviewer
-requirements.txt        @ITDDAN-py-reviewer @ITDDAN-devops-reviewer
-Pipfile                 @ITDDAN-py-reviewer @ITDDAN-devops-reviewer
-pom.xml                 @ITDDAN-java-reviewer @ITDDAN-devops-reviewer
-build.gradle            @ITDDAN-java-reviewer @ITDDAN-devops-reviewer
-go.mod                  @ITDDAN-go-reviewer @ITDDAN-devops-reviewer
-go.sum                  @ITDDAN-go-reviewer @ITDDAN-devops-reviewer
+package.json            @techeer-sv/itddan-js-reviewers @techeer-sv/itddan-devops-reviewers
+package-lock.json       @techeer-sv/itddan-js-reviewers
+requirements.txt        @techeer-sv/itddan-py-reviewers @techeer-sv/itddan-devops-reviewers
+Pipfile                 @techeer-sv/itddan-py-reviewers @techeer-sv/itddan-devops-reviewers
+pom.xml                 @techeer-sv/itddan-java-reviewers @techeer-sv/itddan-devops-reviewers
+build.gradle            @techeer-sv/itddan-java-reviewers @techeer-sv/itddan-devops-reviewers
+go.mod                  @techeer-sv/itddan-go-reviewers @techeer-sv/itddan-devops-reviewers
+go.sum                  @techeer-sv/itddan-go-reviewers @techeer-sv/itddan-devops-reviewers

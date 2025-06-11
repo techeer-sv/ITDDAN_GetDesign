@@ -107,12 +107,12 @@ GitHub Actions를 통해 자동으로 다음 작업들이 수행됩니다:
 
 ## 🏷️ 코드 리뷰어 자동 할당
 
-CODEOWNERS 파일을 통해 언어별로 전문 리뷰어가 자동으로 할당됩니다:
+CODEOWNERS 파일을 통해 언어별로 전문 리뷰 팀이 자동으로 할당됩니다:
 
-- 🐍 Python: `@ITDDAN-py-reviewer`
-- ☕ Java: `@ITDDAN-java-reviewer`
-- 🚀 JavaScript: `@ITDDAN-js-reviewer`
-- 🐹 Go: `@ITDDAN-go-reviewer`
+- 🐍 Python: `@techeer-sv/itddan-py-reviewers`
+- ☕ Java: `@techeer-sv/itddan-java-reviewers`
+- 🚀 JavaScript: `@techeer-sv/itddan-js-reviewers`
+- 🐹 Go: `@techeer-sv/itddan-go-reviewers`
 
 ## 🔧 로컬 개발 워크플로우
 
