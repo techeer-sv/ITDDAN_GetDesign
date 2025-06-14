@@ -1,6 +1,6 @@
 package jungeun;
 
-import java.util.*;
+import java.util.PriorityQueue;
 
 /**
  * 더 맵게 - Java(프로그래머스 42626)
