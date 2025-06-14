@@ -32,7 +32,7 @@ func testTwoSum() {
 	if !reflect.DeepEqual(result1, []int{0, 1}) {
 		panic(fmt.Sprintf("Expected [0 1], got %v", result1))
 	}
-	
+
 	// 테스트 2
 	nums2 := []int{3, 2, 4}
 	target2 := 6
@@ -42,7 +42,7 @@ func testTwoSum() {
 	if !reflect.DeepEqual(result2, []int{1, 2}) {
 		panic(fmt.Sprintf("Expected [1 2], got %v", result2))
 	}
-	
+
 	// 테스트 3
 	nums3 := []int{3, 3}
 	target3 := 6
@@ -52,10 +52,10 @@ func testTwoSum() {
 	if !reflect.DeepEqual(result3, []int{0, 1}) {
 		panic(fmt.Sprintf("Expected [0 1], got %v", result3))
 	}
-	
+
 	fmt.Println("✅ All Go tests passed!")
 }
 
 func main() {
 	testTwoSum()
-} 
+}
