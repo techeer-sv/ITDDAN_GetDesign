@@ -1,5 +1,3 @@
-package jungeun;
-
 import java.util.PriorityQueue;
 
 /**
