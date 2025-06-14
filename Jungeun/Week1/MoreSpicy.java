@@ -1,4 +1,4 @@
-package Jungeun.Week1;
+package jungeun.week1;
 
 import java.util.PriorityQueue;
 

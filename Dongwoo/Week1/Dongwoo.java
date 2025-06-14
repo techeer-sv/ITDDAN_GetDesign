@@ -1,4 +1,4 @@
-package Dongwoo.Week1;
+package dongwoo.week1;
 
 public class Dongwoo {
 
