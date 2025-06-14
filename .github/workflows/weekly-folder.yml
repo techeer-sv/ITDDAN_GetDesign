@@ -19,15 +19,22 @@ jobs:
     - name: 🔍 Find Latest Week Number
       id: find_week
       run: |
-        # 모든 week 폴더 찾기
-        week_folders=$(find . -type d -name "week*" | grep -E "week[0-9]+" || true)
+        # 멤버 폴더 목록
+        members=("ryan" "minki" "hana" "jungeun" "dongwoo" "wooseok")
         
         # 가장 큰 week 번호 찾기
         max_week=0
-        for folder in $week_folders; do
-          week_num=$(echo $folder | grep -o '[0-9]\+')
-          if [ "$week_num" -gt "$max_week" ]; then
-            max_week=$week_num
+        for member in "${members[@]}"; do
+          if [ -d "$member" ]; then
+            # 각 멤버 폴더 내의 week 폴더 찾기
+            week_folders=$(find "$member" -type d -name "week*" | grep -E "week[0-9]+" || true)
+            
+            for folder in $week_folders; do
+              week_num=$(echo $folder | grep -o '[0-9]\+')
+              if [ "$week_num" -gt "$max_week" ]; then
+                max_week=$week_num
+              fi
+            done
           fi
         done
         
