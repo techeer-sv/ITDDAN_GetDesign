@@ -1,0 +1,35 @@
+# 🔍 CODEOWNERS - 언어별 리뷰어 자동 할당
+# 각 언어별로 전문 리뷰어를 지정하여 코드 품질을 관리합니다.
+#
+# 사용법:
+# 1. @username 형태로 GitHub 사용자명을 입력하세요
+# 2. @org/team-name 형태로 조직의 팀을 지정할 수도 있습니다
+# 3. 여러 리뷰어를 지정하려면 공백으로 구분하세요
+
+# 🐍 Python 파일들
+*.py                    @techeer-sv/itddan-py-reviewers
+**/*.py                 @techeer-sv/itddan-py-reviewers
+
+# ☕ Java 파일들
+*.java                  @techeer-sv/itddan-java-reviewers
+**/*.java               @techeer-sv/itddan-java-reviewers
+
+# 🚀 JavaScript/TypeScript 파일들
+*.js                    @techeer-sv/itddan-js-reviewers
+*.ts                    @techeer-sv/itddan-js-reviewers
+**/*.js                 @techeer-sv/itddan-js-reviewers
+**/*.ts                 @techeer-sv/itddan-js-reviewers
+
+# 🐹 Go 파일들
+*.go                    @techeer-sv/itddan-go-reviewers
+**/*.go                 @techeer-sv/itddan-go-reviewers
+
+# 📦 패키지 관리 파일들
+package.json            @techeer-sv/itddan-js-reviewers @techeer-sv/itddan-devops-reviewers
+package-lock.json       @techeer-sv/itddan-js-reviewers
+requirements.txt        @techeer-sv/itddan-py-reviewers @techeer-sv/itddan-devops-reviewers
+Pipfile                 @techeer-sv/itddan-py-reviewers @techeer-sv/itddan-devops-reviewers
+pom.xml                 @techeer-sv/itddan-java-reviewers @techeer-sv/itddan-devops-reviewers
+build.gradle            @techeer-sv/itddan-java-reviewers @techeer-sv/itddan-devops-reviewers
+go.mod                  @techeer-sv/itddan-go-reviewers @techeer-sv/itddan-devops-reviewers
+go.sum                  @techeer-sv/itddan-go-reviewers @techeer-sv/itddan-devops-reviewers
