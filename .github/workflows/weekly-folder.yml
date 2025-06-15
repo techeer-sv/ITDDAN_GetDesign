@@ -3,7 +3,7 @@ name: 📁 Weekly Folder Creation
 on:
   schedule:
     # 매주 월요일 03:30 KST (일요일 18:20 UTC)에 실행
-    - cron: '30 18 * * 0'
+    - cron: '35 18 * * 0'
   workflow_dispatch:  # 수동 실행도 가능하도록
 
 jobs:
