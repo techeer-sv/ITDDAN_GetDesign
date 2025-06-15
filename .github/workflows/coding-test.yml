@@ -225,7 +225,12 @@ jobs:
               dir_path=$(dirname "$file")
               class_name=$(basename "$file" .java)
               package_path=$(echo "$dir_path" | tr '/' '.')
-              if javac "$file" && cd "$(dirname "$dir_path")" && java "$package_path.$class_name"; then
+              
+              # 컴파일 시 소스 경로와 출력 디렉토리 지정
+              mkdir -p target/classes
+              if javac -d target/classes "$file" && \
+                 cd target/classes && \
+                 java "$package_path.$class_name"; then
                 echo "✅ $file 실행 성공"
                 success_count=$((success_count + 1))
               else
