@@ -1,0 +1,68 @@
+name: 📁 Weekly Folder Creation
+
+on:
+  schedule:
+    # 매주 월요일 03:30 KST (일요일 18:20 UTC)에 실행
+    - cron: '35 18 * * 0'
+  workflow_dispatch:  # 수동 실행도 가능하도록
+
+jobs:
+  create-weekly-folder:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: 🔍 Find Latest Week Number
+      id: find_week
+      run: |
+        # 멤버 폴더 목록
+        members=("ryan" "minki" "hana" "jungeun" "dongwoo" "wooseok")
+        
+        # 가장 큰 week 번호 찾기
+        max_week=0
+        for member in "${members[@]}"; do
+          if [ -d "$member" ]; then
+            # 각 멤버 폴더 내의 week 폴더 찾기
+            week_folders=$(find "$member" -type d -name "week*" | grep -E "week[0-9]+" || true)
+            
+            for folder in $week_folders; do
+              week_num=$(echo $folder | grep -o '[0-9]\+')
+              if [ "$week_num" -gt "$max_week" ]; then
+                max_week=$week_num
+              fi
+            done
+          fi
+        done
+        
+        # 다음 week 번호 계산
+        next_week=$((max_week + 1))
+        echo "next_week=$next_week" >> $GITHUB_OUTPUT
+        echo "📊 Current highest week number: $max_week"
+        echo "📁 Next week number to create: $next_week"
+
+    - name: 📁 Create New Week Folders
+      run: |
+        next_week=${{ steps.find_week.outputs.next_week }}
+        
+        # 각 멤버의 폴더에 새로운 week 폴더 생성
+        for member in ryan minki hana jungeun dongwoo wooseok; do
+          if [ -d "$member" ]; then
+            mkdir -p "$member/week$next_week"
+            echo "✅ Created $member/week$next_week"
+          else
+            echo "⚠️ $member folder not found"
+          fi
+        done
+
+    - name: 📝 Commit and Push Changes
+      run: |
+        git config --global user.name 'GitHub Actions'
+        git config --global user.email 'actions@github.com'
+        
+        git add .
+        git commit -m "📁 Create week${{ steps.find_week.outputs.next_week }} folders" || echo "No changes to commit"
+        git push 

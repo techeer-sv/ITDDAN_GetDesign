@@ -1,3 +1,5 @@
+package jungeun.week1;
+
 import java.util.PriorityQueue;
 
 /**

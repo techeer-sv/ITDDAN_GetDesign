@@ -221,8 +221,16 @@ jobs:
               ;;
             *.java)
               echo "☕ Running Java file..."
+              # 패키지 구조를 고려한 컴파일 및 실행
+              dir_path=$(dirname "$file")
               class_name=$(basename "$file" .java)
-              if javac "$file" && timeout 30s java "$class_name"; then
+              package_path=$(echo "$dir_path" | tr '/' '.')
+              
+              # 컴파일 시 소스 경로와 출력 디렉토리 지정
+              mkdir -p target/classes
+              if javac -d target/classes "$file" && \
+                 cd target/classes && \
+                 java "$package_path.$class_name"; then
                 echo "✅ $file 실행 성공"
                 success_count=$((success_count + 1))
               else
