@@ -224,7 +224,8 @@ jobs:
               # 패키지 구조를 고려한 컴파일 및 실행
               dir_path=$(dirname "$file")
               class_name=$(basename "$file" .java)
-              if javac "$file" && cd "$dir_path" && java "$class_name"; then
+              package_path=$(echo "$dir_path" | tr '/' '.')
+              if javac "$file" && cd "$(dirname "$dir_path")" && java "$package_path.$class_name"; then
                 echo "✅ $file 실행 성공"
                 success_count=$((success_count + 1))
               else
