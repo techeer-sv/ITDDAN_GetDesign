@@ -55,4 +55,3 @@ func testFizzBuzz() {
 func main() {
 	testFizzBuzz()
 }
-

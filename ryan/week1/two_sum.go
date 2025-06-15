@@ -59,4 +59,3 @@ func testTwoSum() {
 func main() {
 	testTwoSum()
 }
-
