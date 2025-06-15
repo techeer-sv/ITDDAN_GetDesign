@@ -76,3 +76,4 @@ def test_solution() -> None:
 
 if __name__ == "__main__":
     test_solution()
+    
