@@ -51,8 +51,16 @@ jobs:
         # 각 멤버의 폴더에 새로운 week 폴더 생성
         for member in ryan minki hana jungeun dongwoo wooseok; do
           if [ -d "$member" ]; then
-            mkdir -p "$member/week$next_week"
-            echo "✅ Created $member/week$next_week"
+            week_folder="$member/week$next_week"
+            if [ ! -d "$week_folder" ]; then
+              mkdir -p "$week_folder"
+              # README.md 파일 생성
+              echo "# Week $next_week" > "$week_folder/README.md"
+              echo "Created on $(date '+%Y-%m-%d')" >> "$week_folder/README.md"
+              echo "✅ Created $week_folder with README.md"
+            else
+              echo "ℹ️ $week_folder already exists"
+            fi
           else
             echo "⚠️ $member folder not found"
           fi
@@ -63,6 +71,11 @@ jobs:
         git config --global user.name 'GitHub Actions'
         git config --global user.email 'actions@github.com'
         
-        git add .
-        git commit -m "📁 Create week${{ steps.find_week.outputs.next_week }} folders" || echo "No changes to commit"
-        git push 
+        # 변경사항이 있는지 확인
+        if git status --porcelain | grep -q '^'; then
+          git add .
+          git commit -m "📁 Create week${{ steps.find_week.outputs.next_week }} folders"
+          git push
+        else
+          echo "No changes to commit"
+        fi 
