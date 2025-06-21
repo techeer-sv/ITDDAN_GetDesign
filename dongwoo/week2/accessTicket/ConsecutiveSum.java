@@ -1,3 +1,4 @@
+package dongwoo.week2.accessTicket;
 /**
  * 연속된 자연수의 합으로 표현 - Java (프로그래머스: 숫자의 표현)
  * 자연수 n을 연속된 자연수의 합으로 표현하는 방법의 수 반환
