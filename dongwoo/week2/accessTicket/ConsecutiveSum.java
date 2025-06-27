@@ -7,8 +7,8 @@ public class ConsecutiveSum {
 
     public static int countConsecutiveSumWays(int n) {
         int answer = 0;
-        for (int k = 1; k * (k - 1) / 2 < n; k++) {
-            int t = n - k * (k - 1) / 2;
+        for (int k = 1; (k * (k - 1)) / 2 < n; k++) {
+            int t = n - (k * (k - 1)) / 2;
             if (t % k == 0) {
                 answer++;
             }
