@@ -25,3 +25,6 @@
     body {
         ticketId
     }
+
+스터디 정리 링크:
+https://silken-moss-24d.notion.site/Itddan-Week2-21973344235880b19e0ed27ec8c01575?source=copy_link
