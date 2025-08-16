@@ -1,5 +1,16 @@
 # 백준 2252번 줄 세우기 - 위상정렬 알고리즘 사용
 from collections import defaultdict, deque
+import sys
+
+
+def _safe_input():  # ✅ 추가: 입력이 없으면 조용히 종료
+    try:
+        return input()
+    except EOFError:
+        sys.exit(0)
+
+
+input = _safe_input  # ✅ 입력 함수 재정의
 
 n, m = map(int, input().split())
 graph = defaultdict(list)
