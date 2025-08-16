@@ -1,5 +1,5 @@
 # 백준 2252번 줄 세우기 - 위상정렬 알고리즘 사용
-from collections import deque, defaultdict
+from collections import defaultdict, deque
 
 n, m = map(int, input().split())
 graph = defaultdict(list)
