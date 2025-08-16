@@ -15,7 +15,7 @@
 - 결함 허용 (Fault Tolerance): 개별 구성 요소의 실패가 전체 앱을 다운시키지 않아야 합니다. 특히 WhatsApp과 같은 거대한 시스템에서는 중요합니다.
 
 ---
-![img_1.png](whats.png)
+![whatsapp.png](whatsapp.png)
 
 시드 url로 시작
 크롤링 서버에서 html을 크롤링해오고, 파싱까지 진행하는 것은 무겁다고 생각
