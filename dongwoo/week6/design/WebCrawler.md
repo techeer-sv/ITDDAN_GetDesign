@@ -29,8 +29,7 @@
    컴플라이언스(Compliance): 법적 요구사항 및 개인정보 보호 규정 준수
 
 ---
-![img.png](web.png)
-
+![webcrawler.png](webcrawler.png)
 Inbox
 - 오프라인 사용자에게 전달할 채팅 내역을 따로 관리하는 부분을 누락
 Client
