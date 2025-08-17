@@ -4,6 +4,25 @@ from collections import defaultdict, deque
 from io import StringIO
 
 
+def topo_sort(n: int, graph, in_degree):
+    """
+    Kahn 알고리즘을 이용해 위상정렬을 수행한다.
+    """
+    q = deque()
+    for i in range(1, n + 1):
+        if in_degree[i] == 0:
+            q.append(i)
+    result = []
+    while q:
+        cur = q.popleft()
+        result.append(cur)
+        for nxt in graph[cur]:
+            in_degree[nxt] -= 1
+            if in_degree[nxt] == 0:
+                q.append(nxt)
+    return result
+
+
 def _solve(input_str):
 
     sys.stdin = StringIO(input_str)
@@ -23,20 +42,8 @@ def _solve(input_str):
         graph[a].append(b)
         # 진입 차수 기록
         in_degree[b] += 1
-
-    q = deque()
-    for i in range(1, n + 1):
-        if in_degree[i] == 0:
-            q.append(i)
-    result = []
-    while q:
-        idx = q.popleft()
-        result.append(idx)
-        for next_item in graph[idx]:
-            in_degree[next_item] -= 1  # 해당 노드에서 나가는 간선 제거
-            if in_degree[next_item] == 0:
-                q.append(next_item)
-    return " ".join(map(str, result))
+    order = topo_sort(n, graph, in_degree)
+    return " ".join(map(str, order))
 
 
 def _run_all_tests() -> None:
@@ -54,6 +61,7 @@ def _run_all_tests() -> None:
         },
     ]
 
+    """ 테스트 케이스를 순환하여 결과를 검증. """
     for case in test_cases:
         result = _solve(case["input"])
         assert result.replace(" ", "") == case["expected_output"].replace(
