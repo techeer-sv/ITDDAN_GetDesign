@@ -1,7 +1,6 @@
 # Design LeetCode
 
 -   [Hello Interview - LeetCode System Design](https://www.hellointerview.com/learn/system-design/problem-breakdowns/leetcode)
--   [Excalidraw - 설계 다이어그램](https://excalidraw.com/#json=M77Xq6gAESh0QgNAQQ-N5,EvH2gOavozSwDNTgUVF9sg)
 
 ## 요구사항
 
