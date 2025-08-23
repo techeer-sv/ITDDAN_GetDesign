@@ -32,15 +32,6 @@ def solution(n, c, m, delivery_list):
     return total_delivered
 
 
-# n, c = map(int, input().split())
-# m = int(input())
-# delivery_list = [list(map(int, input().split())) for _ in range(m)]
-
-# result = solution(n, c, m, delivery_list)
-
-# print(result)
-
-
 def main():
     # 예시 테스트 케이스
     n, c, m = 4, 40, 6
