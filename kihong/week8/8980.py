@@ -34,27 +34,46 @@ def solution(n, c, m, delivery_list):
 
 def main():
     # 예시 테스트 케이스
-    n, c, m = 4, 40, 6
-    delivery_list = [
-        [3, 4, 20],
-        [1, 2, 10],
-        [1, 3, 20],
-        [1, 4, 30],
-        [2, 3, 10],
-        [2, 4, 20],
+    cases = [
+        {
+            "name": "test case 1",
+            "n": 4,
+            "c": 40,
+            "m": 6,
+            "delivery_list": [
+                [3, 4, 20],
+                [1, 2, 10],
+                [1, 3, 20],
+                [1, 4, 30],
+                [2, 3, 10],
+                [2, 4, 20],
+            ],
+            "expected": 70,
+        },
+        {
+            "name": "test case 2",
+            "n": 6,
+            "c": 60,
+            "m": 5,
+            "delivery_list": [
+                [1, 2, 30],
+                [2, 5, 70],
+                [5, 6, 60],
+                [3, 4, 40],
+                [1, 6, 40],
+            ],
+            "expected": 150,
+        },
     ]
-
-    # deque는 정렬이 불편하므로 list로 변환하여 사용
-    result = solution(n, c, m, delivery_list)
-
-    print(f"최종 배송된 박스 수: {result}")
-
-    # 기대값 확인
-    expected = 70
-    if result == expected:
-        print("정답입니다!")
-    else:
-        print(f"오답입니다. 기대값: {expected}, 결과: {result} ")
+    for i, tc in enumerate(cases, 1):
+        delivery_copy = [row[:] for row in tc["delivery_list"]]
+        actual_result = solution(tc["n"], tc["c"], tc["m"], delivery_copy)
+        assert actual_result == tc["expected"], (
+            f"[{i}] {tc['name']} 실패: "
+            f"expected={tc['expected']}, actual_result={actual_result}, "
+            f"input=(n={tc['n']}, c={tc['c']}, m={tc['m']})"
+        )
+        print(f"[{i}] {tc['name']} 성공")
 
 
 if __name__ == "__main__":
