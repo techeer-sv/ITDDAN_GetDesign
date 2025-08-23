@@ -86,6 +86,7 @@ jobs:
           echo "✅ All linters installed successfully!"
 
       - name: 🧹 Run Lint Tests
+        id: lint
         if: steps.changes.outputs.has_code_files == 'true'
         run: |
           echo "🔍 Running lint tests on changed files..."
@@ -187,12 +188,15 @@ jobs:
 
           if [ $lint_success -eq $lint_total ]; then
             echo "✅ All files passed lint checks!"
+            echo "result=success" >> $GITHUB_OUTPUT
           else
             echo "❌ Some files failed lint checks."
+            echo "result=failure" >> $GITHUB_OUTPUT
             exit 1
           fi
 
       - name: 🧪 Run Code Tests
+        id: test
         if: steps.changes.outputs.has_code_files == 'true'
         run: |
           echo "🔍 코드 파일 실행 및 검증 시작..."
@@ -269,12 +273,15 @@ jobs:
 
           if [ $success_count -eq $total_count ] && [ $total_count -gt 0 ]; then
             echo "🎉 모든 코드 파일이 성공적으로 실행되었습니다!"
+            echo "result=success" >> $GITHUB_OUTPUT
             exit 0
           elif [ $total_count -eq 0 ]; then
             echo "ℹ️ 실행할 코드 파일이 없습니다."
+            echo "result=success" >> $GITHUB_OUTPUT
             exit 0
           else
             echo "💥 일부 코드 파일 실행에 실패했습니다."
+            echo "result=failure" >> $GITHUB_OUTPUT
             exit 1
           fi
 
@@ -291,18 +298,42 @@ jobs:
             let comment = `## 🔍 코딩 테스트 검증 결과\n\n`;
             comment += `자동으로 코드를 실행하여 검증했습니다.\n\n`;
             comment += `📊 [상세 결과 보기](${workflowUrl})\n\n`;
+
             console.log('🔍 Checking workflow status...');
-            console.log('GITHUB_JOB_STATUS:', process.env.GITHUB_JOB_STATUS);
-            if (process.env.GITHUB_JOB_STATUS === 'success') {
+
+            // 이전 단계들의 결과를 확인하여 워크플로우 상태 판단
+            const lintResult = '${{ steps.lint.outputs.result }}';
+            const testResult = '${{ steps.test.outputs.result }}';
+
+            console.log('Lint result:', lintResult);
+            console.log('Test result:', testResult);
+
+            // 모든 단계가 성공했는지 확인
+            if (lintResult === 'success' && testResult === 'success') {
               comment += `✅ **모든 코드가 성공적으로 실행되었습니다!**\n`;
+              comment += `🎉 린트 검사와 코드 실행이 모두 통과했습니다.\n`;
             } else {
               comment += `❌ **일부 코드 실행에 문제가 있습니다.**\n`;
               comment += `위 링크에서 상세한 오류 내용을 확인해주세요.\n`;
+              
+              if (lintResult !== 'success') {
+                comment += `🔍 린트 검사에서 문제가 발생했습니다.\n`;
+              }
+              if (testResult !== 'success') {
+                comment += `🧪 코드 실행에서 문제가 발생했습니다.\n`;
+              }
             }
 
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
+            // PR에 코멘트 작성
+            try {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+              console.log('✅ Comment posted successfully!');
+            } catch (error) {
+              console.error('❌ Failed to post comment:', error.message);
+              // 코멘트 작성 실패 시에도 워크플로우는 계속 진행
+            }
