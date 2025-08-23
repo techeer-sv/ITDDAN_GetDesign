@@ -94,15 +94,9 @@ def test_solution() -> None:
         description = test_case["description"]
 
         result = solution(nums)
-
-        print(f"테스트 {i} - {description}")
-        print(f"  입력: {nums}")
-        print(f"  결과: {result}, 기대값: {expected}")
-
-        assert result == expected, f"기대값 {expected}, 실제값 {result}"
-        print("  통과\n")
-
-    print("모든 테스트 케이스 통과!")
+        assert (
+            result == expected
+        ), f"테스트 {i} 실패: {description} - 기대값 {expected}, 실제값 {result}"
 
 
 if __name__ == "__main__":
