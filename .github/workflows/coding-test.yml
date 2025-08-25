@@ -9,299 +9,331 @@ on:
 jobs:
   lint-and-test:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: 📥 Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: 🔍 Detect changed files
-      id: changes
-      run: |
-        if [ "${{ github.event_name }}" = "pull_request" ]; then
-          # PR에서 변경된 파일들 감지
-          git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} > changed_files.txt
-        else
-          # Push에서 변경된 파일들 감지
-          git diff --name-only HEAD~1 HEAD > changed_files.txt
-        fi
-        
-        # .md 파일이 아닌 코드 파일들만 필터링
-        grep -v '\.md$' changed_files.txt | grep -E '\.(py|js|ts|java|go)$' > code_files.txt || true
-        
-        if [ -s code_files.txt ]; then
-          echo "has_code_files=true" >> $GITHUB_OUTPUT
-          echo "📋 변경된 코드 파일들:"
-          cat code_files.txt
-        else
-          echo "has_code_files=false" >> $GITHUB_OUTPUT
-          echo "❌ 변경된 코드 파일이 없습니다."
-        fi
-
-    - name: 🐍 Setup Python
-      if: steps.changes.outputs.has_code_files == 'true'
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-
-    - name: ☕ Setup Java
-      if: steps.changes.outputs.has_code_files == 'true'
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-
-    - name: 🚀 Setup Node.js
-      if: steps.changes.outputs.has_code_files == 'true'
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-
-    - name: 🐹 Setup Go
-      if: steps.changes.outputs.has_code_files == 'true'
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.21'
-        cache: false
-
-    - name: 🔍 Install Linters
-      if: steps.changes.outputs.has_code_files == 'true'
-      run: |
-        echo "🔧 Installing linters for all languages..."
-        
-        # Python linters
-        python3 -m pip install --upgrade pip
-        pip install flake8 black isort
-        
-        # JavaScript linters
-        npm install -g eslint prettier @eslint/create-config
-        
-        # Go linters
-        go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-        
-        # Java linters (checkstyle)
-        wget -q https://github.com/checkstyle/checkstyle/releases/download/checkstyle-10.12.4/checkstyle-10.12.4-all.jar -O checkstyle.jar
-        
-        echo "✅ All linters installed successfully!"
-
-    - name: 🧹 Run Lint Tests
-      if: steps.changes.outputs.has_code_files == 'true'
-      run: |
-        echo "🔍 Running lint tests on changed files..."
-        
-        lint_success=0
-        lint_total=0
-        
-        while IFS= read -r file; do
-          if [ ! -f "$file" ]; then
-            continue
+      - name: 🔍 Detect changed files
+        id: changes
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            # PR에서 변경된 파일들 감지
+            git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} > changed_files.txt
+          else
+            # Push에서 변경된 파일들 감지
+            git diff --name-only HEAD~1 HEAD > changed_files.txt
           fi
-          
-          echo "🔍 Linting: $file"
-          lint_total=$((lint_total + 1))
-          
-          case "$file" in
-            *.py)
-              echo "🐍 Running Python linters via script..."
-              chmod +x scripts/lint_python.sh
-              if ./scripts/lint_python.sh "$file"; then
-                echo "✅ $file passed Python lint"
-                lint_success=$((lint_success + 1))
-              else
-                echo "❌ $file failed Python lint"
-              fi
-              ;;
-              
-            *.js)
-              echo "🚀 Running JavaScript linters..."
-              lint_passed=true
-              
-              # ESLint (if .eslintrc exists or create basic config)
-              if [ ! -f ".eslintrc.json" ] && [ ! -f ".eslintrc.js" ]; then
-                echo '{"extends": ["eslint:recommended"], "env": {"node": true, "es6": true}, "parserOptions": {"ecmaVersion": 2022}}' > .eslintrc.json
-              fi
-              
-              if ! npx eslint "$file"; then
-                echo "❌ ESLint issues found in $file"
-                lint_passed=false
-              fi
-              
-              # Prettier (formatter check)
-              if ! npx prettier --check "$file"; then
-                echo "❌ Prettier formatting issues found in $file"
-                lint_passed=false
-              fi
-              
-              if $lint_passed; then
-                echo "✅ $file passed JavaScript lint"
-                lint_success=$((lint_success + 1))
-              fi
-              ;;
-              
-            *.java)
-              echo "☕ Running Java linters..."
-              if java -jar checkstyle.jar -c checkstyle.xml "$file"; then
-                echo "✅ $file passed Java lint"
-                lint_success=$((lint_success + 1))
-              else
-                echo "❌ $file failed Java lint"
-              fi
-              ;;
-              
-            *.go)
-              echo "🐹 Running Go linters..."
-              lint_passed=true
-              
-              # gofmt (formatter check)
-              if [ "$(gofmt -l "$file")" ]; then
-                echo "❌ Go formatting issues found in $file"
-                gofmt -d "$file"
-                lint_passed=false
-              fi
-              
-              # golangci-lint
-              if ! golangci-lint run "$file"; then
-                echo "❌ Golangci-lint issues found in $file"
-                lint_passed=false
-              fi
-              
-              if $lint_passed; then
-                echo "✅ $file passed Go lint"
-                lint_success=$((lint_success + 1))
-              fi
-              ;;
-              
-            *)
-              echo "⚠️ $file: No linter configured for this file type"
-              lint_success=$((lint_success + 1))  # Skip unknown files
-              ;;
-          esac
-          echo "---"
-        done < code_files.txt
-        
-        echo "🔍 Lint Results Summary:"
-        echo "- Total files linted: $lint_total"
-        echo "- Files passed: $lint_success"
-        echo "- Files failed: $((lint_total - lint_success))"
-        
-        if [ $lint_success -eq $lint_total ]; then
-          echo "✅ All files passed lint checks!"
-        else
-          echo "❌ Some files failed lint checks."
-          exit 1
-        fi
 
-    - name: 🧪 Run Code Tests
-      if: steps.changes.outputs.has_code_files == 'true'
-      run: |
-        echo "🔍 코드 파일 실행 및 검증 시작..."
-        
-        success_count=0
-        total_count=0
-        
-        while IFS= read -r file; do
-          if [ ! -f "$file" ]; then
-            continue
+          # .md 파일이 아닌 코드 파일들만 필터링
+          grep -v '\.md$' changed_files.txt | grep -E '\.(py|js|ts|java|go)$' > code_files.txt || true
+
+          if [ -s code_files.txt ]; then
+            echo "has_code_files=true" >> $GITHUB_OUTPUT
+            echo "📋 변경된 코드 파일들:"
+            cat code_files.txt
+          else
+            echo "has_code_files=false" >> $GITHUB_OUTPUT
+            echo "❌ 변경된 코드 파일이 없습니다."
           fi
-          
-          echo "📄 Testing: $file"
-          total_count=$((total_count + 1))
-          
-          # 파일 확장자에 따라 실행
-          case "$file" in
-            *.py)
-              echo "🐍 Running Python file..."
-              if timeout 30s python3 "$file"; then
-                echo "✅ $file 실행 성공"
-                success_count=$((success_count + 1))
-              else
-                echo "❌ $file 실행 실패"
-              fi
-              ;;
-            *.java)
-              echo "☕ Running Java file..."
-              # 패키지 구조를 고려한 컴파일 및 실행
-              dir_path=$(dirname "$file")
-              class_name=$(basename "$file" .java)
-              package_path=$(echo "$dir_path" | tr '/' '.')
-              
-              # 컴파일 시 소스 경로와 출력 디렉토리 지정
-              mkdir -p target/classes
-              if javac -d target/classes "$file" && \
-                 cd target/classes && \
-                 java "$package_path.$class_name"; then
-                echo "✅ $file 실행 성공"
-                success_count=$((success_count + 1))
-              else
-                echo "❌ $file 실행 실패"
-              fi
-              ;;
-            *.js)
-              echo "🚀 Running JavaScript file..."
-              if timeout 30s node "$file"; then
-                echo "✅ $file 실행 성공"
-                success_count=$((success_count + 1))
-              else
-                echo "❌ $file 실행 실패"
-              fi
-              ;;
-            *.go)
-              echo "🐹 Running Go file..."
-              if timeout 30s go run "$file"; then
-                echo "✅ $file 실행 성공"
-                success_count=$((success_count + 1))
-              else
-                echo "❌ $file 실행 실패"
-              fi
-              ;;
-            *)
-              echo "⚠️ $file: 지원하지 않는 파일 형식"
-              ;;
-          esac
-          echo "---"
-        done < code_files.txt
-        
-        echo "📊 결과 요약:"
-        echo "- 총 파일 수: $total_count"
-        echo "- 성공한 파일: $success_count"
-        echo "- 실패한 파일: $((total_count - success_count))"
-        
-        if [ $success_count -eq $total_count ] && [ $total_count -gt 0 ]; then
-          echo "🎉 모든 코드 파일이 성공적으로 실행되었습니다!"
-          exit 0
-        elif [ $total_count -eq 0 ]; then
-          echo "ℹ️ 실행할 코드 파일이 없습니다."
-          exit 0
-        else
-          echo "💥 일부 코드 파일 실행에 실패했습니다."
-          exit 1
-        fi
 
-    - name: 📝 Comment on PR
-      if: github.event_name == 'pull_request' && steps.changes.outputs.has_code_files == 'true'
-      uses: actions/github-script@v7
-      with:
-        script: |
-          const fs = require('fs');
-          
-          // 워크플로우 결과에 따른 코멘트 생성
-          const workflowUrl = `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
-          
-          let comment = `## 🔍 코딩 테스트 검증 결과\n\n`;
-          comment += `자동으로 코드를 실행하여 검증했습니다.\n\n`;
-          comment += `📊 [상세 결과 보기](${workflowUrl})\n\n`;
-          
-          if (process.env.GITHUB_JOB_STATUS === 'success') {
-            comment += `✅ **모든 코드가 성공적으로 실행되었습니다!**\n`;
-          } else {
-            comment += `❌ **일부 코드 실행에 문제가 있습니다.**\n`;
-            comment += `위 링크에서 상세한 오류 내용을 확인해주세요.\n`;
-          }
-          
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: comment
-          }); 
+      - name: 🐍 Setup Python
+        if: steps.changes.outputs.has_code_files == 'true'
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: ☕ Setup Java
+        if: steps.changes.outputs.has_code_files == 'true'
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: 🚀 Setup Node.js
+        if: steps.changes.outputs.has_code_files == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: 🐹 Setup Go
+        if: steps.changes.outputs.has_code_files == 'true'
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.21"
+          cache: false
+
+      - name: 🔍 Install Linters
+        if: steps.changes.outputs.has_code_files == 'true'
+        run: |
+          echo "🔧 Installing linters for all languages..."
+
+          # Python linters
+          python3 -m pip install --upgrade pip
+          pip install flake8 black isort
+
+          # JavaScript linters
+          npm install -g eslint prettier @eslint/create-config
+
+          # Go linters
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+          # Java linters (checkstyle)
+          wget -q https://github.com/checkstyle/checkstyle/releases/download/checkstyle-10.12.4/checkstyle-10.12.4-all.jar -O checkstyle.jar
+
+          echo "✅ All linters installed successfully!"
+
+      - name: 🧹 Run Lint Tests
+        id: lint
+        if: steps.changes.outputs.has_code_files == 'true'
+        run: |
+          echo "🔍 Running lint tests on changed files..."
+
+          lint_success=0
+          lint_total=0
+
+          while IFS= read -r file; do
+            if [ ! -f "$file" ]; then
+              continue
+            fi
+            
+            echo "🔍 Linting: $file"
+            lint_total=$((lint_total + 1))
+            
+            case "$file" in
+              *.py)
+                echo "🐍 Running Python linters via script..."
+                chmod +x scripts/lint_python.sh
+                if ./scripts/lint_python.sh "$file"; then
+                  echo "✅ $file passed Python lint"
+                  lint_success=$((lint_success + 1))
+                else
+                  echo "❌ $file failed Python lint"
+                fi
+                ;;
+                
+              *.js)
+                echo "🚀 Running JavaScript linters..."
+                lint_passed=true
+                
+                # ESLint (if .eslintrc exists or create basic config)
+                if [ ! -f ".eslintrc.json" ] && [ ! -f ".eslintrc.js" ]; then
+                  echo '{"extends": ["eslint:recommended"], "env": {"node": true, "es6": true}, "parserOptions": {"ecmaVersion": 2022}}' > .eslintrc.json
+                fi
+                
+                if ! npx eslint "$file"; then
+                  echo "❌ ESLint issues found in $file"
+                  lint_passed=false
+                fi
+                
+                # Prettier (formatter check)
+                if ! npx prettier --check "$file"; then
+                  echo "❌ Prettier formatting issues found in $file"
+                  lint_passed=false
+                fi
+                
+                if $lint_passed; then
+                  echo "✅ $file passed JavaScript lint"
+                  lint_success=$((lint_success + 1))
+                fi
+                ;;
+                
+              *.java)
+                echo "☕ Running Java linters..."
+                if java -jar checkstyle.jar -c checkstyle.xml "$file"; then
+                  echo "✅ $file passed Java lint"
+                  lint_success=$((lint_success + 1))
+                else
+                  echo "❌ $file failed Java lint"
+                fi
+                ;;
+                
+              *.go)
+                echo "🐹 Running Go linters..."
+                lint_passed=true
+                
+                # gofmt (formatter check)
+                if [ "$(gofmt -l "$file")" ]; then
+                  echo "❌ Go formatting issues found in $file"
+                  gofmt -d "$file"
+                  lint_passed=false
+                fi
+                
+                # golangci-lint
+                if ! golangci-lint run "$file"; then
+                  echo "❌ Golangci-lint issues found in $file"
+                  lint_passed=false
+                fi
+                
+                if $lint_passed; then
+                  echo "✅ $file passed Go lint"
+                  lint_success=$((lint_success + 1))
+                fi
+                ;;
+                
+              *)
+                echo "⚠️ $file: No linter configured for this file type"
+                lint_success=$((lint_success + 1))  # Skip unknown files
+                ;;
+            esac
+            echo "---"
+          done < code_files.txt
+
+          echo "🔍 Lint Results Summary:"
+          echo "- Total files linted: $lint_total"
+          echo "- Files passed: $lint_success"
+          echo "- Files failed: $((lint_total - lint_success))"
+
+          if [ $lint_success -eq $lint_total ]; then
+            echo "✅ All files passed lint checks!"
+            echo "result=success" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Some files failed lint checks."
+            echo "result=failure" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: 🧪 Run Code Tests
+        id: test
+        if: steps.changes.outputs.has_code_files == 'true'
+        run: |
+          echo "🔍 코드 파일 실행 및 검증 시작..."
+
+          success_count=0
+          total_count=0
+
+          while IFS= read -r file; do
+            if [ ! -f "$file" ]; then
+              continue
+            fi
+            
+            echo "📄 Testing: $file"
+            total_count=$((total_count + 1))
+            
+            # 파일 확장자에 따라 실행
+            case "$file" in
+              *.py)
+                echo "🐍 Running Python file..."
+                if timeout 30s python3 "$file"; then
+                  echo "✅ $file 실행 성공"
+                  success_count=$((success_count + 1))
+                else
+                  echo "❌ $file 실행 실패"
+                fi
+                ;;
+              *.java)
+                echo "☕ Running Java file..."
+                # 패키지 구조를 고려한 컴파일 및 실행
+                dir_path=$(dirname "$file")
+                class_name=$(basename "$file" .java)
+                package_path=$(echo "$dir_path" | tr '/' '.')
+                
+                # 컴파일 시 소스 경로와 출력 디렉토리 지정
+                mkdir -p target/classes
+                if javac -d target/classes "$file" && \
+                   cd target/classes && \
+                   java "$package_path.$class_name"; then
+                  echo "✅ $file 실행 성공"
+                  success_count=$((success_count + 1))
+                else
+                  echo "❌ $file 실행 실패"
+                fi
+                ;;
+              *.js)
+                echo "🚀 Running JavaScript file..."
+                if timeout 30s node "$file"; then
+                  echo "✅ $file 실행 성공"
+                  success_count=$((success_count + 1))
+                else
+                  echo "❌ $file 실행 실패"
+                fi
+                ;;
+              *.go)
+                echo "🐹 Running Go file..."
+                if timeout 30s go run "$file"; then
+                  echo "✅ $file 실행 성공"
+                  success_count=$((success_count + 1))
+                else
+                  echo "❌ $file 실행 실패"
+                fi
+                ;;
+              *)
+                echo "⚠️ $file: 지원하지 않는 파일 형식"
+                ;;
+            esac
+            echo "---"
+          done < code_files.txt
+
+          echo "📊 결과 요약:"
+          echo "- 총 파일 수: $total_count"
+          echo "- 성공한 파일: $success_count"
+          echo "- 실패한 파일: $((total_count - success_count))"
+
+          if [ $success_count -eq $total_count ] && [ $total_count -gt 0 ]; then
+            echo "🎉 모든 코드 파일이 성공적으로 실행되었습니다!"
+            echo "result=success" >> $GITHUB_OUTPUT
+            exit 0
+          elif [ $total_count -eq 0 ]; then
+            echo "ℹ️ 실행할 코드 파일이 없습니다."
+            echo "result=success" >> $GITHUB_OUTPUT
+            exit 0
+          else
+            echo "💥 일부 코드 파일 실행에 실패했습니다."
+            echo "result=failure" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: 📝 Comment on PR
+        if: github.event_name == 'pull_request' && steps.changes.outputs.has_code_files == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            // 워크플로우 결과에 따른 코멘트 생성
+            const workflowUrl = `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
+
+            let comment = `## 🔍 코딩 테스트 검증 결과\n\n`;
+            comment += `자동으로 코드를 실행하여 검증했습니다.\n\n`;
+            comment += `📊 [상세 결과 보기](${workflowUrl})\n\n`;
+
+            console.log('🔍 Checking workflow status...');
+
+            // 이전 단계들의 결과를 확인하여 워크플로우 상태 판단
+            const lintResult = '${{ steps.lint.outputs.result }}';
+            const testResult = '${{ steps.test.outputs.result }}';
+
+            console.log('Lint result:', lintResult);
+            console.log('Test result:', testResult);
+
+            // 모든 단계가 성공했는지 확인
+            if (lintResult === 'success' && testResult === 'success') {
+              comment += `✅ **모든 코드가 성공적으로 실행되었습니다!**\n`;
+              comment += `🎉 린트 검사와 코드 실행이 모두 통과했습니다.\n`;
+            } else {
+              comment += `❌ **일부 코드 실행에 문제가 있습니다.**\n`;
+              comment += `위 링크에서 상세한 오류 내용을 확인해주세요.\n`;
+              
+              if (lintResult !== 'success') {
+                comment += `🔍 린트 검사에서 문제가 발생했습니다.\n`;
+              }
+              if (testResult !== 'success') {
+                comment += `🧪 코드 실행에서 문제가 발생했습니다.\n`;
+              }
+            }
+
+            // PR에 코멘트 작성
+            try {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+              console.log('✅ Comment posted successfully!');
+            } catch (error) {
+              console.error('❌ Failed to post comment:', error.message);
+              // 코멘트 작성 실패 시에도 워크플로우는 계속 진행
+            }
