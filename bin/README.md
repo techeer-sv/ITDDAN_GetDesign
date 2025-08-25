@@ -16,7 +16,7 @@ Java 및 Python 코드 파일을 자동으로 스테이징하고 커밋한 후, 
 
 ## 사용 방법
 
-### 1. 실행 권한 부여 (Linux/macOS)
+### 1. 실행 권한 부여 (Linux/macOS) (필요시)
 
 ```bash
 chmod +x bin/test_and_commit.sh
