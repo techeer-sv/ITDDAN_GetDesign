@@ -35,3 +35,52 @@ $ ITDDAN_GetDesign> ./study build system_architecture --mode=deep-dive --source=
 - [JavaScript 린팅 가이드](./docs/LINTING_JAVASCRIPT.md)
 - [Go 린팅 가이드](./docs/LINTING_GO.md)
 - [Act 테스트 가이드](./docs/ACT_TESTING_GUIDE.md)
+
+
+---
+## 브랜치 & PR 규칙
+
+### 브랜치 네이밍
+- 스터디 주차 브랜치: `week{N}-{이름}` (예: week9-jungeun)
+- 기타 브랜치: 목적에 맞는 이름 사용(이슈에서 생성되는 대로) (예: fix-python-lint, update-ci-config)
+
+### 커밋 메시지
+- 코딩테스트: `Week{N} 입장권 제출` (예: Week9 입장권 제출)
+- 아키텍처 분석: `Week{N} {영상/자료명} 제출` (예: Week9 Netflix System Design 제출)
+  - 영상 하나당 하나의 커밋으로 작성
+
+### PR(Pull Request)
+- PR 제목: `Week{N} {이름}` (예: Week9 Jungeun)
+- PR은 스터디 주차에 맞춰서 생성
+- PR 설명에는 다음 내용을 반드시 포함:
+  - 구현한 내용 요약
+  - 리뷰어는 로컬에서 아래의 방법으로 테스트할 수 있습니다.
+    ```bash
+    # Python
+    $ python3 파일명.py
+    
+    # Java
+    $ javac -d target/classes 파일명.java
+    $ cd target/classes
+    $ java 패키지.클래스명
+    
+    # JavaScript
+    $ node 파일명.js
+    
+    # Go
+    $ go run 파일명.go
+    ```
+
+
+### 코드 리뷰 규칙
+- PR 작성자
+  - 리뷰 코멘트에 대한 응답은 모두 작성
+  - 코드 수정 후에는 리뷰어에게 Re-review 요청 (소용돌이 버튼 클릭)
+  - 피드백을 반영한 경우, 해당 커밋 링크를 코멘트로 남기기
+  - 모든 리뷰어가 Approve 했다면 직접 Merge 진행
+
+- 리뷰어
+  - 할당된 PR은 책임감을 가지고 리뷰
+  - 리뷰 완료 후 반드시 Approve 진행
+  - 시스템 설계 및 구현에 대해서도 적극적인 리뷰 권장
+
