@@ -15,7 +15,7 @@ git commit -m "$COMMIT_MESSAGE"
 # 'push' 이벤트로 로컬에서 GitHub Actions 테스트
 echo "Running GitHub Actions tests locally using 'act'..."
 if gh act push; then
-    echo "Tests passed successfully! Pushing to remote repository..."
+    echo "Tests passed successfully!"
     
 else
     echo "Tests failed. Please check the workflow errors."
