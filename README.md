@@ -42,3 +42,15 @@ $ ITDDAN_GetDesign> ./study build system_architecture --mode=deep-dive --source=
 ### PR(Pull Request)
 - PR 제목: `Week{N} {이름}` (예: Week9 Jungeun)
 - PR은 스터디 주차에 맞춰서 생성
+
+### 코드 리뷰 규칙
+- PR 작성자
+  - 리뷰 코멘트에 대한 응답은 모두 작성
+  - 코드 수정 후에는 리뷰어에게 Re-review 요청 (소용돌이 버튼 클릭)
+  - 피드백을 반영한 경우, 해당 커밋 링크를 코멘트로 남기기
+  - 모든 리뷰어가 Approve 했다면 직접 Merge 진행
+
+- 리뷰어
+  - 할당된 PR은 책임감을 가지고 리뷰
+  - 리뷰 완료 후 반드시 Approve 진행
+  - 시스템 설계 및 구현에 대해서도 적극적인 리뷰 권장
