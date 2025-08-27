@@ -12,7 +12,25 @@ Java 및 Python 코드 파일을 자동으로 스테이징하고 커밋한 후, 
 
 ## Act 설치
 
-- [Act 설치 가이드](../docs/ACT_TESTING_GUIDE.md#act-설치)
+### 방법 1: Homebrew 사용 (Mac OS)
+
+```bash
+# 최신 안정 릴리스 설치 (권장)
+brew install act
+# 가장 최신 개발 버전 설치
+brew install act --HEAD
+# 버전 조회
+act --version
+```
+
+### 방법 2: Gihub CLI(Git bash) 사용 (Mac OS / Window) (권장)
+
+```bash
+# gh 확장으로 설치
+gh extension install nektos/gh-act
+# 버전 조회
+gh act --version
+```
 
 ## 사용 방법
 
