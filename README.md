@@ -42,6 +42,25 @@ $ ITDDAN_GetDesign> ./study build system_architecture --mode=deep-dive --source=
 ### PR(Pull Request)
 - PR 제목: `Week{N} {이름}` (예: Week9 Jungeun)
 - PR은 스터디 주차에 맞춰서 생성
+- PR 설명에는 다음 내용을 반드시 포함:
+  - 구현한 내용 요약
+  - 리뷰어는 로컬에서 아래의 방법으로 테스트할 수 있습니다.
+    ```bash
+    # Python
+    $ python3 파일명.py
+    
+    # Java
+    $ javac -d target/classes 파일명.java
+    $ cd target/classes
+    $ java 패키지.클래스명
+    
+    # JavaScript
+    $ node 파일명.js
+    
+    # Go
+    $ go run 파일명.go
+    ```
+
 
 ### 코드 리뷰 규칙
 - PR 작성자
