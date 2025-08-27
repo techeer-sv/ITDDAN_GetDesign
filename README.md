@@ -26,3 +26,19 @@ $ ITDDAN_GetDesign> ./study build system_architecture --mode=deep-dive --source=
 - [Java 린팅 가이드](./docs/LINTING_JAVA.md)
 - [JavaScript 린팅 가이드](./docs/LINTING_JAVASCRIPT.md)
 - [Go 린팅 가이드](./docs/LINTING_GO.md)
+
+---
+## 브랜치 & PR 규칙
+
+### 브랜치 네이밍
+- 스터디 주차 브랜치: `week{N}-{이름}` (예: week9-jungeun)
+- 기타 브랜치: 목적에 맞는 이름 사용(이슈에서 생성되는 대로) (예: fix-python-lint, update-ci-config)
+
+### 커밋 메시지
+- 코딩테스트: `Week{N} 입장권 제출` (예: Week9 입장권 제출)
+- 아키텍처 분석: `Week{N} {영상/자료명} 제출` (예: Week9 Netflix System Design 제출)
+  - 영상 하나당 하나의 커밋으로 작성
+
+### PR(Pull Request)
+- PR 제목: `Week{N} {이름}` (예: Week9 Jungeun)
+- PR은 스터디 주차에 맞춰서 생성
