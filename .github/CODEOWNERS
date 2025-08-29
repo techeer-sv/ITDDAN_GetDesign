@@ -6,6 +6,9 @@
 # 2. @org/team-name 형태로 조직의 팀을 지정할 수도 있습니다
 # 3. 여러 리뷰어를 지정하려면 공백으로 구분하세요
 
+# .github 
+.github                 @techeer-sv/dev-rel-reviewers
+
 # 🐍 Python 파일들
 *.py                    @techeer-sv/itddan-py-reviewers
 **/*.py                 @techeer-sv/itddan-py-reviewers
