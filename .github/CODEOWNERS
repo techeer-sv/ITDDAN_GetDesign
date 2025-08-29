@@ -7,7 +7,7 @@
 # 3. 여러 리뷰어를 지정하려면 공백으로 구분하세요
 
 # .github 
-.github                 @techeer-sv/dev-rel-reviewers
+.github                 @techeer-sv/dev-rel-reviewer
 
 # 🐍 Python 파일들
 *.py                    @techeer-sv/itddan-py-reviewers
