@@ -32,7 +32,7 @@ package.json            @techeer-sv/itddan-js-reviewers
 package-lock.json       @techeer-sv/itddan-js-reviewers
 requirements.txt        @techeer-sv/itddan-py-reviewers 
 Pipfile                 @techeer-sv/itddan-py-reviewers 
-pom.xml                 @techeer-sv/itddan-java-reviewers @techeer-sv/itddan-devops-reviewers
-build.gradle            @techeer-sv/itddan-java-reviewers @techeer-sv/itddan-devops-reviewers
-go.mod                  @techeer-sv/itddan-go-reviewers @techeer-sv/itddan-devops-reviewers
-go.sum                  @techeer-sv/itddan-go-reviewers @techeer-sv/itddan-devops-reviewers
+pom.xml                 @techeer-sv/itddan-java-reviewers 
+build.gradle            @techeer-sv/itddan-java-reviewers 
+go.mod                  @techeer-sv/itddan-go-reviewers 
+go.sum                  @techeer-sv/itddan-go-reviewers 
