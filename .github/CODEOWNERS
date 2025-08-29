@@ -28,10 +28,10 @@
 **/*.go                 @techeer-sv/itddan-go-reviewers
 
 # 📦 패키지 관리 파일들
-package.json            @techeer-sv/itddan-js-reviewers @techeer-sv/itddan-devops-reviewers
+package.json            @techeer-sv/itddan-js-reviewers 
 package-lock.json       @techeer-sv/itddan-js-reviewers
-requirements.txt        @techeer-sv/itddan-py-reviewers @techeer-sv/itddan-devops-reviewers
-Pipfile                 @techeer-sv/itddan-py-reviewers @techeer-sv/itddan-devops-reviewers
+requirements.txt        @techeer-sv/itddan-py-reviewers 
+Pipfile                 @techeer-sv/itddan-py-reviewers 
 pom.xml                 @techeer-sv/itddan-java-reviewers @techeer-sv/itddan-devops-reviewers
 build.gradle            @techeer-sv/itddan-java-reviewers @techeer-sv/itddan-devops-reviewers
 go.mod                  @techeer-sv/itddan-go-reviewers @techeer-sv/itddan-devops-reviewers
