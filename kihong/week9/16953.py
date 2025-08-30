@@ -17,14 +17,19 @@
 def solve(a, b):
     count = 0
     while a != b and a < b:
+        # if b가 2로 나누어떨어진다면:
         if b % 2 == 0:
+            # b를 2로 나누고, count += 1
             b = b // 2
             count += 1
+        # b의 1의 자리수가 1이라면:
         elif b % 10 == 1:
+            # b를 b의 10의 자리 숫자로 변경.
             b = (b - 1) // 10
             count += 1
         else:
             break
+    # return a와 b가 같지 않다면 -1 , 같다면 count +1
     return count + 1 if a == b else -1
 
 
