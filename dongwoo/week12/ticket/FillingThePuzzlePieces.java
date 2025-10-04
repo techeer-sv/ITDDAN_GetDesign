@@ -11,11 +11,11 @@ public class FillingThePuzzlePieces {
     static int[] dx = {0, 0, -1, 1};
     static int[] dy = {1, -1, 0, 0};
 
-    public int solution(int[][] game_board, int[][] table) {
+    public int solution(int[][] gameBoard, int[][] table) {
         int answer = 0;
         int len = table.length;
         //빈 공간 찾기(0)
-        List<Shape> emptyShapes = findShapes(game_board, 0, len);
+        List<Shape> emptyShapes = findShapes(gameBoard, 0, len);
         //퍼즐 조각 찾기(1)
         List<Shape> puzzleShapes = findShapes(table, 1, len);
         // 퍼즐을 회전해가며 매칭
